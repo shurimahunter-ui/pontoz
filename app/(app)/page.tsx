@@ -1,4 +1,5 @@
 import { connection } from 'next/server'
+import { redirect } from 'next/navigation'
 import { clockIn, clockOut } from '@/app/actions/punch'
 import { createClient } from '@/lib/supabase/server'
 import { dayKey, dayStart, fmtDay, fmtTime, formatHM, hoursToMs, totalMs, weekMs, weekStart, type Entry } from '@/lib/hours'
@@ -9,7 +10,8 @@ export default async function HomePage() {
   await connection()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user!.id).single()
+  if (!user) redirect('/login')
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
   const tz: string = profile.timezone
   const now = new Date()
   const weekStartAt = weekStart(now, tz)
