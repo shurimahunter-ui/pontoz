@@ -1,4 +1,5 @@
 import { connection } from 'next/server'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { durationMs, fmtDay, fmtTime, formatHM, groupByDay, hoursToMs, totalMs, type Entry } from '@/lib/hours'
 
@@ -9,7 +10,8 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
   const sp = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: profile } = await supabase.from('profiles').select('timezone, daily_hours').eq('id', user!.id).single()
+  if (!user) redirect('/login')
+  const { data: profile } = await supabase.from('profiles').select('timezone, daily_hours').eq('id', user.id).single()
   const tz: string = profile!.timezone
   const now = new Date()
 
