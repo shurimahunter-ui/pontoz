@@ -1,4 +1,5 @@
 import { connection } from 'next/server'
+import { redirect } from 'next/navigation'
 import { logout } from '@/app/actions/auth'
 import Logo from '@/components/Logo'
 import Nav from '@/components/Nav'
@@ -10,7 +11,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   await connection()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: profile } = await supabase.from('profiles').select('name').eq('id', user!.id).single()
+  if (!user) redirect('/login')
+  const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single()
 
   return (
     <div className="shell">
