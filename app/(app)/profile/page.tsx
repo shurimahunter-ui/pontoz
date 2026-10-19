@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import { updateProfile } from '@/app/actions/profile'
 import { createClient } from '@/lib/supabase/server'
 
@@ -5,7 +6,8 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const sp = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: p } = await supabase.from('profiles').select('*').eq('id', user!.id).single()
+  if (!user) redirect('/login')
+  const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single()
 
   return (
     <main className="space-y-4">
